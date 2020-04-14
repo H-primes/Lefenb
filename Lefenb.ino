@@ -1,5 +1,7 @@
+#include <ADXL345.h>
 #include <MsTimer2.h>
-
+#include <Wire.h>
+#include "Protocentral_MAX30205.h"
 #include <SoftwareSerial.h>
 //#include <FlexiTimer2.h>//定时器库
 #include <HardwareSerial.h>
@@ -14,10 +16,14 @@ bool completed = false;//上一次心跳完成
 #define H HIGH
 #define L LOW
 
+//ADXL345 I2C地址是0x53
+#define ADDR 0x53
 
 void setup()
 {
+  Wire.begin();//I2C通信,我是主机，我没参数，进入总线
   tempSetup();
+  adxlSetup();
   MsTimer2::set(2, interrupt);//使用timer2定时器，每2ms进入一次中断
   MsTimer2::start();
   pinMode(beatPin,OUTPUT);
@@ -28,6 +34,8 @@ void setup()
 int IBIS[10];//记录最近10次的IBI
 unsigned long curTime = 0;//当前运行时间
 unsigned long lastTime = 0;//上次的心跳
+unsigned long nowTime = 0;
+unsigned long startTime = 0;
 int Signal;//读取pulsePin的
 int interval;//每次脉搏已读取的时间
 int flagValue = 525;//特征值
@@ -41,6 +49,7 @@ void interrupt()
   OUT = !OUT;*/
   //getTemp();
   pulseSensor();
+  getSteps();
 }
 
 void SerialOut()
@@ -52,6 +61,6 @@ void SerialOut()
 }
 void loop()
 {
-  SerialOut();
+  //SerialOut();
   delay(500);
 }
