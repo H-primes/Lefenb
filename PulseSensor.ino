@@ -27,7 +27,7 @@ void pulseSensor()
   if(Signal < flagValue && completed)
   {
     amp = P -V;
-    flagValue = (P - V)/2 + V;
+    flagValue = (P + V)>>1;
     completed = false;
     P = flagValue;
     V = flagValue;

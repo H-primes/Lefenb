@@ -1,10 +1,7 @@
-#include <ADXL345.h>
 #include <MsTimer2.h>
 #include <Wire.h>
 #include "Protocentral_MAX30205.h"
 #include <SoftwareSerial.h>
-//#include <FlexiTimer2.h>//定时器库
-#include <HardwareSerial.h>
 
 int beatPin = 13;//随脉搏闪烁
 int pulsePin = 0;//传感器连接模拟引脚A0
@@ -18,7 +15,7 @@ bool completed = false;//上一次心跳完成
 
 //ADXL345 I2C地址是0x53
 #define ADDR 0x53
-
+static int step_cnt = 0;
 void setup()
 {
   Wire.begin();//I2C通信,我是主机，我没参数，进入总线
@@ -34,14 +31,11 @@ void setup()
 int IBIS[10];//记录最近10次的IBI
 unsigned long curTime = 0;//当前运行时间
 unsigned long lastTime = 0;//上次的心跳
-unsigned long nowTime = 0;
-unsigned long startTime = 0;
 int Signal;//读取pulsePin的
 int interval;//每次脉搏已读取的时间
 int flagValue = 525;//特征值
 int P = 512 ,V = 512 ,amp = 50;//峰，谷，振幅amplitude
 bool firstIBI = true; 
-int times = 0;
 void interrupt()
 {
   /*static boolean OUT = H;
@@ -49,18 +43,20 @@ void interrupt()
   OUT = !OUT;*/
   //getTemp();
   pulseSensor();
-  getSteps();
 }
 
 void SerialOut()
 {
-  Serial.print("BPM is ");
+  /*Serial.print("BPM is ");
   Serial.println(BPM);
-  getTemp();
+  getTemp();*/
+  Serial.print("STEP is ");
+  Serial.println(step_cnt);
   //Serial.println(curTime);
 }
 void loop()
 {
-  //SerialOut();
-  delay(500);
+  getSteps();
+  SerialOut();
+  //delay(300);
 }
