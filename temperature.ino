@@ -4,10 +4,7 @@ void tempSetup()
 {
   tempSensor.begin();
 }
-void getTemp()
+void getTemp(float* temp)
 {
-  float temp = tempSensor.getTemperature();
-  Serial.print("TEMP is ");
-  Serial.print(temp,2);
-  Serial.println("°C");
+  *temp = tempSensor.getTemperature();
 }

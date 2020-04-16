@@ -13,8 +13,8 @@
 //---------------------------------------------------------------
 #define FILTER_CNT 4
 #define SAMPLE_SIZE 50
-#define MAX(a,b) (a)>(b) ? (a):(b)
-#define MIN(a,b) (a)>(b) ? (b):(a)
+#define MAX(a,b) ((a)>(b)?(a):(b))
+#define MIN(a,b) ((a)>(b)?(b):(a))
 
 typedef struct _ACCL{
     int x;
@@ -209,7 +209,6 @@ void getSteps(){
     bool res = slid_update(&slid0, &sample);//更新动态变化精度
 
     detect_step(&peak0, & slid0, &sample);  
-    
 }
 
 

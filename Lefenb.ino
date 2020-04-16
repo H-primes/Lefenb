@@ -1,4 +1,4 @@
-#include <MsTimer2.h>
+#include <FlexiTimer2.h>
 #include <Wire.h>
 #include "Protocentral_MAX30205.h"
 #include <SoftwareSerial.h>
@@ -16,15 +16,27 @@ bool completed = false;//上一次心跳完成
 //ADXL345 I2C地址是0x53
 #define ADDR 0x53
 static int step_cnt = 0;
+//------------------------------------
+//gps
+char nmeaSentence[68];
+String latitude;    //纬度
+String longitude;   //经度
+String lndSpeed;    //速度
+String gpsTime;     //UTC时间，本初子午线经度0度的时间，和北京时间差8小时
+String beiJingTime;   //北京时间
+
+SoftwareSerial GPSSerial(10, 11); // RX, TX
+//--------------------------------------
 void setup()
 {
+  GPSSerial.begin(115200);//软串口
   Wire.begin();//I2C通信,我是主机，我没参数，进入总线
   tempSetup();
   adxlSetup();
-  MsTimer2::set(2, interrupt);//使用timer2定时器，每2ms进入一次中断
-  MsTimer2::start();
+  FlexiTimer2::set(2, interrupt);//使用timer2定时器，每2ms进入一次中断
+  FlexiTimer2::start();
   pinMode(beatPin,OUTPUT);
-  Serial.begin(9600);
+  Serial.begin(115200);
 }
 
 
@@ -41,22 +53,34 @@ void interrupt()
   /*static boolean OUT = H;
   digitalWrite(beatPin,OUT);
   OUT = !OUT;*/
-  //getTemp();
+  //Serial.println("+++++++++++++++++++++++++++++++++++++++++++++++++++++");
   pulseSensor();
+  //getSteps();
+  
 }
-
+unsigned long lastTime0 = 0;
+float temp;
 void SerialOut()
 {
-  /*Serial.print("BPM is ");
-  Serial.println(BPM);
-  getTemp();*/
-  Serial.print("STEP is ");
-  Serial.println(step_cnt);
-  //Serial.println(curTime);
+  Serial.println(millis()-lastTime0);
+  if(millis()-lastTime0 > 300){
+      Serial.print("BPM is ");
+      Serial.println(BPM);
+  
+      Serial.print("STEP is ");
+      Serial.println(step_cnt);
+      //Serial.println(curTime);
+
+      Serial.print("TEMP is ");
+      Serial.print(temp,2);
+      Serial.println("°C");
+      lastTime0 = millis();
+  }
 }
 void loop()
-{
+{ 
+  get_gps_info();
+  getTemp(&temp);
   getSteps();
   SerialOut();
-  //delay(300);
 }
