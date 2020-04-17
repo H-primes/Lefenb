@@ -1,47 +1,21 @@
 void get_gps_info() 
 {
-  Serial.println("in get_gps_info");
-  for (unsigned long start = millis(); millis() - start < 1000;)  //一秒钟内不停扫描GPS信息
-  {
+  //Serial.println("in get_gps_info()");
     while (GPSSerial.available()) //串口获取到数据开始解析
     {
         char c = GPSSerial.read();  //读取一个字节获取的数据
-
+        //Serial.print(c);
         if(c == '$')        //判断该字节的值,若是$，则说明是一帧数据的开始
         {
              GPSSerial.readBytesUntil('*', nmeaSentence, 67);    //读取接下来的数据，存放在nmeaSentence字符数组中，最大存放67个字节
-             //Serial.println(nmeaSentence);
+            // Serial.println(nmeaSentence);
              latitude = parseGprmcLat(nmeaSentence); //获取纬度值
              longitude = parseGprmcLon(nmeaSentence);//获取经度值
              lndSpeed = parseGprmcSpeed(nmeaSentence);//获取速度值
-             gpsTime = parseGprmcTime(nmeaSentence);//获取GPS时间
-
-
-            if(latitude > "")   //当不是空时候打印输出
-            {
-                Serial.println("------------------------------------");
-                Serial.println("latitude: " + latitude);
-            }
-
-            if(longitude > "")    //当不是空时候打印输出
-            {
-                Serial.println("longitude: " + longitude);
-            }  
-
-            if(lndSpeed > "")   //当不是空时候打印输出
-            {
-                Serial.println("Speed (knots): " + lndSpeed);
-            }
-
-            if(gpsTime > "")    //当不是空时候打印输出
-            {
-                Serial.println("gpsTime: " + gpsTime);
-                beiJingTime = getBeiJingTime(gpsTime);  //获取北京时间 
-                Serial.println("beiJingTime: " + beiJingTime);        
-            }   
+             gpsTime = parseGprmcTime(nmeaSentence);//获取GPS时间           
       }
     }
-  }
+  
 }
 
 String getBeiJingTime(String s)

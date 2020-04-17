@@ -1,13 +1,16 @@
-#include <FlexiTimer2.h>
+#include <MsTimer2.h>
 #include <Wire.h>
 #include "Protocentral_MAX30205.h"
 #include <SoftwareSerial.h>
+
+bool BPM_state = false;
+bool GPS_state = false;
+bool TEMP_state = false;
 
 int beatPin = 13;//随脉搏闪烁
 int pulsePin = 0;//传感器连接模拟引脚A0
 int BPM;//脉搏
 int IBI;//间隔时间
-
 bool detected = false;//ture当侦测到心跳
 bool completed = false;//上一次心跳完成
 #define H HIGH
@@ -29,14 +32,14 @@ SoftwareSerial GPSSerial(10, 11); // RX, TX
 //--------------------------------------
 void setup()
 {
-  GPSSerial.begin(115200);//软串口
+  GPSSerial.begin(9600);//软串口
   Wire.begin();//I2C通信,我是主机，我没参数，进入总线
   tempSetup();
   adxlSetup();
-  FlexiTimer2::set(2, interrupt);//使用timer2定时器，每2ms进入一次中断
-  FlexiTimer2::start();
+  MsTimer2::set(20, interrupt);//使用timer2定时器，每2ms进入一次中断
+ // MsTimer2::start();
   pinMode(beatPin,OUTPUT);
-  Serial.begin(115200);
+  Serial.begin(9600);
 }
 
 
@@ -50,37 +53,93 @@ int P = 512 ,V = 512 ,amp = 50;//峰，谷，振幅amplitude
 bool firstIBI = true; 
 void interrupt()
 {
-  /*static boolean OUT = H;
-  digitalWrite(beatPin,OUT);
-  OUT = !OUT;*/
   //Serial.println("+++++++++++++++++++++++++++++++++++++++++++++++++++++");
-  pulseSensor();
-  //getSteps();
-  
+ pulseSensor();
 }
 unsigned long lastTime0 = 0;
 float temp;
 void SerialOut()
 {
-  Serial.println(millis()-lastTime0);
-  if(millis()-lastTime0 > 300){
-      Serial.print("BPM is ");
-      Serial.println(BPM);
-  
+  //Serial.println(millis()-lastTime0);
+  if(millis()-lastTime0 > 600){
+      if(BPM_state){
+          Serial.print("BPM is ");
+          Serial.println(BPM);
+      }
+        
       Serial.print("STEP is ");
       Serial.println(step_cnt);
       //Serial.println(curTime);
 
-      Serial.print("TEMP is ");
-      Serial.print(temp,2);
-      Serial.println("°C");
+     if(TEMP_state){
+         Serial.print("TEMP is ");
+         Serial.print(temp,2);
+         Serial.println("°C");
+     }      
+     if(GPS_state){
+          if(latitude > "")   //当不是空时候打印输出
+            {
+                Serial.println("------------------------------------");
+                Serial.println("latitude: " + latitude);
+            }
+
+            if(longitude > "")    //当不是空时候打印输出
+            {
+                Serial.println("longitude: " + longitude);
+            }  
+
+            if(lndSpeed > "")   //当不是空时候打印输出
+            {
+                Serial.println("Speed (knots): " + lndSpeed);
+            }
+
+            if(gpsTime > "")    //当不是空时候打印输出
+            {
+                Serial.println("gpsTime: " + gpsTime);
+                beiJingTime = getBeiJingTime(gpsTime);  //获取北京时间 
+                Serial.println("beiJingTime: " + beiJingTime);        
+            }
+     }
       lastTime0 = millis();
   }
 }
+char command;
 void loop()
-{ 
+{
+
+  //TODO:read!!!
+  if(Serial.available()){
+      command = Serial.read(); 
+      Serial.println("++++++++++++++++++++++++++++++++++++++++++++");
+      Serial.println(command);
+  }
+  if(command == '1'){//开始测心率
+    if(!BPM_state){
+        MsTimer2::start();
+        BPM_state = true;
+    }
+  }else if(command == '2'){
+    if(BPM_state){
+        MsTimer2::stop();
+        BPM_state = false;
+    }     
+  }
+
+  if(command == '3'){//开始测体温
+      TEMP_state = true;
+  }else if(command == '4'){
+      TEMP_state = false;
+  }
+  if(TEMP_state) {
+      getTemp(&temp);
+  }
+
+  if(command == '5'){
+      GPS_state = true;
+  }else if(command == '6'){
+      GPS_state = false;
+  }
   get_gps_info();
-  getTemp(&temp);
   getSteps();
   SerialOut();
 }

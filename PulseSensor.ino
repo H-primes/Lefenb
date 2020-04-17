@@ -1,6 +1,9 @@
 void pulseSensor()
 {
-  curTime += 2;//总时间+2ms
+  //sei();
+  //Serial.print("Time:---------------------------------------------------------");
+  //Serial.println(millis());
+  curTime = millis();//总时间+2ms
   Signal = analogRead(pulsePin);//读取Pulse Sensor的信号
   interval = curTime - lastTime;
 
