@@ -42,9 +42,10 @@ void get_gps_info()
                         beiJingTime = getBeiJingTime(gpsTime);  //获取北京时间 
                         Serial.println("beiJingTime: " + beiJingTime);        
                     }
+                    
             }
-             
-             break;          
+             break;
+                       
       }
     }
   
