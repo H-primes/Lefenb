@@ -1,15 +1,3 @@
-/*
- * 计算步数
- * 一开始自己根据心率的写的一种效果太差
- * 虽然说和心率的思想差不多，但是确实复杂很多
- * 然后去学习了ADI公司的资料和若干个csdn大佬的方法
- * 主要分为五步
- * 一、得到各轴加速度
- * 二、均值滤波(没用啥厉害的滤波算法)，拿到多组三个轴的数据，求平均值
- * 三、选取动态阈值：更新MAX和MIN。每采样50次更新一次，动态阈值去(max + min)>>1
- * 四、
- * 五、
- */
 //---------------------------------------------------------------
 #define FILTER_CNT 4
 #define SAMPLE_SIZE 50
@@ -77,8 +65,8 @@ void peak_update(struct _PEAK *peak, struct _ACCL *cur_sample){
 
 }
 //-----------------------------------------------------------------------------
-#define ABS(a) (0 - (a)) > 0 ? (-(a)) : (a)
-#define DYNAMIC_PRECISION 30  //动态精度
+#define ABS(a) ((0 - (a)) > 0 ? (-(a)) : (a))
+#define DYNAMIC_PRECISION 40  //动态精度
 typedef struct _slid_reg{
     ACCL new_sample;
     ACCL old_sample;
