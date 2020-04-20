@@ -6,6 +6,7 @@
 bool BPM_state = false;
 bool GPS_state = false;
 bool TEMP_state = false;
+bool STEP_state = false;
 
 int beatPin = 13;//随脉搏闪烁
 int pulsePin = 0;//传感器连接模拟引脚A0
@@ -60,46 +61,24 @@ unsigned long lastTime0 = 0;
 float temp;
 void SerialOut()
 {
+  //Serial.println(GPS_state);
   //Serial.println(millis()-lastTime0);
   if(millis()-lastTime0 > 600){
       if(BPM_state){
-          Serial.print("BPM is ");
-          Serial.println(BPM);
+          Serial.print("B");
+          Serial.print(BPM);
+          Serial.print('*');
       }
-        
-      Serial.print("STEP is ");
-      Serial.println(step_cnt);
-      //Serial.println(curTime);
-
+      if(STEP_state){  
+          Serial.print("S");
+          Serial.print(step_cnt);
+          Serial.print('*');
+      }
      if(TEMP_state){
-         Serial.print("TEMP is ");
+         Serial.print("T");
          Serial.print(temp,2);
-         Serial.println("°C");
+         Serial.print("*");
      }      
-     if(GPS_state){
-          if(latitude > "")   //当不是空时候打印输出
-            {
-                Serial.println("------------------------------------");
-                Serial.println("latitude: " + latitude);
-            }
-
-            if(longitude > "")    //当不是空时候打印输出
-            {
-                Serial.println("longitude: " + longitude);
-            }  
-
-            if(lndSpeed > "")   //当不是空时候打印输出
-            {
-                Serial.println("Speed (knots): " + lndSpeed);
-            }
-
-            if(gpsTime > "")    //当不是空时候打印输出
-            {
-                Serial.println("gpsTime: " + gpsTime);
-                beiJingTime = getBeiJingTime(gpsTime);  //获取北京时间 
-                Serial.println("beiJingTime: " + beiJingTime);        
-            }
-     }
       lastTime0 = millis();
   }
 }
@@ -110,8 +89,8 @@ void loop()
   //TODO:read!!!
   if(Serial.available()){
       command = Serial.read(); 
-      Serial.println("++++++++++++++++++++++++++++++++++++++++++++");
-      Serial.println(command);
+     // Serial.println("++++++++++++++++++++++++++++++++++++++++++++");
+     // Serial.println(command);
   }
   if(command == '1'){//开始测心率
     if(!BPM_state){
@@ -135,8 +114,14 @@ void loop()
   }
 
   if(command == '5'){
-      GPS_state = true;
+      STEP_state = true;
   }else if(command == '6'){
+      STEP_state = false;
+  }
+  
+  if(command == '7'){
+      GPS_state = true;
+  }else if(command == '8'){
       GPS_state = false;
   }
   get_gps_info();

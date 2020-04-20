@@ -78,7 +78,7 @@ void peak_update(struct _PEAK *peak, struct _ACCL *cur_sample){
 }
 //-----------------------------------------------------------------------------
 #define ABS(a) (0 - (a)) > 0 ? (-(a)) : (a)
-#define DYNAMIC_PRECISION 300  //动态精度
+#define DYNAMIC_PRECISION 30  //动态精度
 typedef struct _slid_reg{
     ACCL new_sample;
     ACCL old_sample;
